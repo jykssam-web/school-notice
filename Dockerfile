@@ -3,5 +3,6 @@ WORKDIR /app
 COPY . .
 RUN npm install
 RUN npm run build
-EXPOSE 3000
-CMD ["npm", "run", "preview"]
+EXPOSE 8080
+ENV PORT=8080
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "8080"]
