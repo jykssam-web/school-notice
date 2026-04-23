@@ -1,0 +1,7 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/school-notice', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/school-notice']
+  - name: 'gcr.io/cloud-builders/run'
+    args: ['deploy', 'school-notice', '--image', 'gcr.io/$PROJECT_ID/school-notice', '--region', 'europe-west1', '--platform', 'managed']
