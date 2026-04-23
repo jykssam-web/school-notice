@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3B82F6" />
+    <title>CampusNotice: 스마트 전자칠판 대시보드</title>
+    <style>
+      /* Fallback for older browsers that might not load external CSS */
+      body { background-color: #111111; color: white; margin: 0; font-family: sans-serif; }
+      #root:empty::before { content: "로딩 중... (지속될 경우 최신 브라우저를 사용해 주세요)"; display: flex; justify-content: center; align-items: center; height: 100vh; font-weight: bold; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
