@@ -47,7 +47,7 @@ export default function AdminView() {
   const [members, setMembers] = useState<any[]>([]);
   const [bulkNames, setBulkNames] = useState("");
   const [memberLoading, setMemberLoading] = useState(false);
-  const [activeChannel, setActiveChannel] = useState('');
+
   // 디데이 state
   const [ddayName, setDdayName] = useState("");
   const [ddayDate, setDdayDate] = useState("");
