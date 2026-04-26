@@ -469,8 +469,8 @@ export default function ChalkboardView() {
                   </h2>
                   <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
                     <div className="min-h-full flex flex-col justify-center text-center py-2">
-                      <p className="text-white font-black leading-[1.3] px-2 text-2xl"
-                        style={{ wordBreak: 'keep-all', overflowWrap: 'break-word', whiteSpace: 'pre-wrap' }}>
+                      <p className="text-white font-black leading-[1.3] px-2 text-lg"
+                        style={{ wordBreak: 'keep-all', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                         {latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}
                       </p>
                       {latestNotice?.author && (
@@ -497,8 +497,8 @@ export default function ChalkboardView() {
                     </div>
                     {prevItem ? (
                       <div className="flex items-center gap-4 flex-1 min-w-0 overflow-hidden">
-                        <p className="text-neutral-300 font-bold leading-tight group-hover:text-white transition-colors truncate text-sm" style={{ wordBreak: 'keep-all' }}>
-                          {prevItem.content}
+                        <p className="text-neutral-300 font-bold leading-tight group-hover:text-white transition-colors truncate text-base" style={{ wordBreak: 'keep-all' }}>
+                          {(prevItem.content || '').replace(/\n+/g, ' ')}
                         </p>
                         {prevItem.author && <span className="text-[10px] text-neutral-700 font-black shrink-0">— {prevItem.author}</span>}
                       </div>
