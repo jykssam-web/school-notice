@@ -105,7 +105,7 @@ export default function ChalkboardView() {
     const target = new Date(dateStr);
     target.setHours(0, 0, 0, 0);
     const diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    if (diff === 0) return 'D-Day!';
+    if (diff === 0) return 'D-Day';
     if (diff > 0) return `D-${diff}`;
     return `D+${Math.abs(diff)}`;
   };
@@ -373,75 +373,59 @@ export default function ChalkboardView() {
 
           {/* 시계 */}
           <motion.div initial={{ x: -30, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
-            className="row-span-3 bg-[#1A1A1A] rounded-[56px] border border-white/5 p-8 flex flex-col items-center justify-between shadow-2xl relative overflow-hidden">
+            className="row-span-3 bg-[#1A1A1A] rounded-[56px] border border-white/5 p-8 flex flex-col items-center justify-center shadow-2xl relative overflow-hidden">
             <div className="absolute top-[-100px] left-[-100px] w-96 h-96 bg-blue-500/5 rounded-full blur-[120px]" />
-            <div className="flex flex-col items-center">
-              <Clock size={24} className="text-blue-400 mb-3" />
-              <h3 className="text-[10px] font-black tracking-[0.2em] text-neutral-600 uppercase mb-4">현재 시간</h3>
-            </div>
             <div className="flex flex-col items-center text-center">
+              <Clock size={20} className="text-blue-400 mb-3" />
               <div className="text-5xl md:text-6xl font-black text-white tracking-tighter">
                 {currentTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
               </div>
-              <div className="text-xs md:text-sm text-neutral-600 font-black mt-4 uppercase tracking-widest">{formattedDate}</div>
+              <div className="text-[10px] text-neutral-600 font-black mt-4 uppercase tracking-[0.2em]">{formattedDate}</div>
             </div>
           </motion.div>
 
           {/* 급식 및 디데이 */}
           <motion.div initial={{ x: -30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 }}
-            className="row-span-4 flex flex-col gap-4">
-            {/* 급식 */}
-            <div className="flex-1 bg-[#1A1A1A] rounded-[40px] border border-white/5 px-4 pt-4 pb-5 flex flex-col shadow-2xl relative overflow-hidden">
-              <div className="absolute bottom-[-60px] right-[-60px] w-48 h-48 bg-orange-500/5 rounded-full blur-[80px]" />
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <UtensilsCrossed size={12} className="text-orange-400" />
-                <span className="text-[10px] font-black tracking-[0.15em] text-orange-400/80 uppercase">Lunch</span>
-                {meal?.cal && <span className="text-[9px] text-neutral-600 font-black">{meal.cal}</span>}
+            className="row-span-6 flex flex-col gap-6">
+            
+            {/* 급식: 2배 확대 */}
+            <div className="flex-[2.5] bg-[#1A1A1A] rounded-[48px] border border-white/5 p-8 flex flex-col shadow-2xl relative overflow-hidden">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <UtensilsCrossed size={16} className="text-orange-400" />
+                <span className="text-[12px] font-black tracking-[0.15em] text-orange-400/80 uppercase">Today's Lunch</span>
+                {meal?.cal && <span className="text-[10px] text-neutral-600 font-black">{meal.cal}</span>}
               </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <div className="flex-1 overflow-y-auto custom-scrollbar flex items-center justify-center">
                 {meal ? (
-                  <p className="text-white font-bold text-xs leading-relaxed whitespace-pre-line text-center">{meal.menu}</p>
+                  <p className="text-white font-bold text-xl md:text-2xl leading-relaxed whitespace-pre-line text-center">{meal.menu}</p>
                 ) : (
-                  <p className="text-neutral-700 text-[10px] font-black uppercase tracking-widest italic text-center mt-2">급식 정보 없음</p>
+                  <p className="text-neutral-700 text-xs font-black italic text-center">급식 정보 로딩 중...</p>
                 )}
               </div>
             </div>
 
-            {/* 디데이 */}
-            <div className="flex-1 bg-[#1A1A1A] rounded-[40px] border border-white/5 px-4 pt-4 pb-5 flex flex-col items-center justify-center shadow-2xl relative overflow-hidden">
+            {/* 디데이: 가로 나열 */}
+            <div className="flex-1 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-6 flex items-center justify-center shadow-2xl relative overflow-hidden">
               <div className="absolute top-[-60px] left-[-60px] w-48 h-48 bg-purple-500/5 rounded-full blur-[80px]" />
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <Flag size={12} className="text-purple-400" />
-                <span className="text-[10px] font-black tracking-[0.15em] text-purple-400/80 uppercase">D-Day</span>
-              </div>
               {dday ? (
-                <div className="text-center">
-                  <p className="text-white font-black text-3xl md:text-4xl tracking-tighter">
+                <div className="flex items-center justify-center gap-6 w-full">
+                  <span className="text-neutral-400 text-[1.2rem] md:text-[1.5rem] font-black uppercase tracking-widest">{dday.name}</span>
+                  <span className="text-white font-black text-[2.5rem] md:text-[3rem] lg:text-[3.5rem] leading-none tracking-tighter">
                     {calcDday(dday.date)}
-                  </p>
-                  <p className="text-neutral-500 text-[11px] font-black mt-2 uppercase tracking-widest">{dday.name}</p>
+                  </span>
                 </div>
               ) : (
-                <p className="text-neutral-700 text-[10px] font-black uppercase tracking-widest italic text-center">미설정</p>
+                <p className="text-neutral-800 text-xs font-black uppercase italic tracking-widest">D-Day 미설정</p>
               )}
             </div>
           </motion.div>
 
-          {/* 명언 */}
+          {/* 명언: 높이 절반 축소 */}
           <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
-            className="row-span-5 bg-[#1A1A1A] rounded-[56px] border border-white/5 p-10 flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            <div className="relative z-10 flex flex-col items-center max-w-[90%]">
-              <Quote className="text-blue-500/20 mb-4 group-hover:scale-110 transition-transform duration-500" size={24} />
-              <p className={`${getQuoteFontSize(dailyQuote.text)} font-black leading-tight text-neutral-200 italic mb-6 tracking-tight`}>
-                "{dailyQuote.text}"
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                <div className="w-10 h-[2px] bg-blue-500/30 rounded-full" />
-                <p className="text-xs md:text-sm font-black text-blue-500 uppercase tracking-[0.3em]">{dailyQuote.author}</p>
-                <div className="w-10 h-[2px] bg-blue-500/30 rounded-full" />
-              </div>
-            </div>
+            className="row-span-3 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-2xl">
+            <Quote className="text-blue-500/10 mb-2" size={20} />
+            <p className="text-sm md:text-base font-bold leading-snug text-neutral-400 italic mb-3 line-clamp-2">"{dailyQuote.text}"</p>
+            <p className="text-[10px] font-black text-blue-500/50 uppercase tracking-widest">{dailyQuote.author}</p>
           </motion.div>
         </div>
 
@@ -450,7 +434,7 @@ export default function ChalkboardView() {
 
           {/* 최신 공지 */}
           <motion.div initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}
-            className="row-span-4 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-8 md:p-10 flex flex-col shadow-2xl relative overflow-hidden">
+            className="row-span-4 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-8 flex flex-col shadow-2xl relative overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-4">
                 <div className="bg-[#FACC15] text-black px-4 py-1.5 text-[10px] font-black rounded-lg uppercase italic">Latest Notice</div>
@@ -467,19 +451,18 @@ export default function ChalkboardView() {
                   <h2 className="text-[#FACC15]/30 text-[12px] font-black uppercase italic mb-4 tracking-widest">
                     {latestNotice?.title || "최근 소식"}
                   </h2>
-                  {/* 글자 크기를 이전 공지 리스트와 동일한 text-[1.5rem] md:text-[1.8rem]로 수정 */}
                   <p className="text-white font-bold leading-[1.4] text-center px-10 text-[1.5rem] md:text-[1.8rem]"
                      style={{ wordBreak: 'keep-all', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                     {latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}
                   </p>
                   {latestNotice?.author && (
-                    <p className="text-[#FACC15] text-[1.2rem] font-black mt-6 opacity-80 italic">— {latestNotice.author} 선생님</p>
+                    <p className="text-[#FACC15] text-[1.1rem] font-black mt-6 opacity-80 italic">— {latestNotice.author} 선생님</p>
                   )}
                 </motion.div>
               </AnimatePresence>
             </div>
           </motion.div>
-          
+
           {/* 이전 공지 */}
           <div className="row-span-8 grid grid-cols-1 grid-rows-4 gap-4">
             {[0, 1, 2, 3].map((idx) => {
@@ -493,9 +476,8 @@ export default function ChalkboardView() {
                       <span className="text-[12px] font-black uppercase tracking-widest text-neutral-600">#{idx + 1}</span>
                     </div>
                     {prevItem ? (
-                      <div className="flex items-center gap-6 flex-1 min-w-0">
-                        <p className="text-neutral-200 font-bold leading-[1.3] group-hover:text-white transition-colors 
-                                      text-[1.5rem] md:text-[1.8rem] line-clamp-2" 
+                      <div className="flex items-center gap-6 flex-1 min-w-0 overflow-hidden">
+                        <p className="text-neutral-200 font-bold leading-[1.3] group-hover:text-white transition-colors text-[1.5rem] md:text-[1.8rem] line-clamp-2"
                            style={{ wordBreak: 'keep-all' }}>
                           {(prevItem.content || '').replace(/\n+/g, ' ')}
                         </p>
@@ -539,6 +521,7 @@ export default function ChalkboardView() {
                 <button onClick={() => {
                   setShowNotification(false);
                   if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+                  else if ((document as any).webkitRequestFullscreen) (document as any).webkitRequestFullscreen();
                 }} className="bg-white text-green-600 hover:bg-gray-100 px-6 py-3 rounded-xl font-black transition-all">전체화면</button>
               </div>
             </div>
