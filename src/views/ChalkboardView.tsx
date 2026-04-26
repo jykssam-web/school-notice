@@ -12,6 +12,7 @@ declare global {
     electron?: {
       ipcRenderer: {
         invoke: (channel: string, data?: any) => Promise<any>;
+        send: (channel: string, data?: any) => void;
       };
     };
   }
@@ -313,7 +314,6 @@ export default function ChalkboardView() {
                   </div>
                 )}
 
-                {/* 현재 설정된 학교 */}
                 {schoolCode && (
                   <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30">
                     <p className="text-xs font-bold text-blue-400">학교 코드</p>
@@ -345,7 +345,7 @@ export default function ChalkboardView() {
                 </div>
                 <button
                   onClick={handleSaveDday}
-                  disabled={settingsStatus === "loading" || !ddayName || !ddayDate}
+                  disabled={settingsStatus === "loading"}
                   className={`w-full py-2 rounded-xl font-black text-sm transition-all ${
                     settingsStatus === "success"
                       ? "bg-green-500 text-white"
@@ -450,7 +450,7 @@ export default function ChalkboardView() {
 
           {/* 최신 공지 */}
           <motion.div initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}
-            className="row-span-4 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-6 md:p-8 flex flex-col shadow-2xl relative overflow-hidden">
+            className="row-span-4 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-8 md:p-10 flex flex-col shadow-2xl relative overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-4">
                 <div className="bg-[#FACC15] text-black px-4 py-1.5 text-[10px] font-black rounded-lg uppercase italic">Latest Notice</div>
@@ -458,26 +458,23 @@ export default function ChalkboardView() {
                   {latestNotice ? `${new Date(latestNotice.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : "수신 대기 중..."}
                 </span>
               </div>
-              <Bell size={20} className={showNotification ? "text-[#FACC15] animate-bounce" : "text-neutral-700"} />
+              <Bell size={24} className={showNotification ? "text-[#FACC15] animate-bounce" : "text-neutral-700"} />
             </div>
-            <div className="flex-1 min-h-0 relative">
+            <div className="flex-1 flex flex-col justify-center relative min-h-0">
               <AnimatePresence mode="wait">
-                <motion.div key={latestNotice?.timestamp || "empty"} initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.02 }}
-                  className="w-full h-full flex flex-col">
-                  <h2 className="text-[#FACC15]/40 text-[10px] font-black uppercase italic tracking-tighter mb-1 text-center shrink-0">
+                <motion.div key={latestNotice?.timestamp || "empty"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                  className="w-full flex flex-col items-center justify-center">
+                  <h2 className="text-[#FACC15]/30 text-[12px] font-black uppercase italic mb-4 tracking-widest">
                     {latestNotice?.title || "최근 소식"}
                   </h2>
-                  <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
-                    <div className="min-h-full flex flex-col justify-center text-center py-2">
-                      <p className="text-white font-black leading-[1.3] px-2 text-lg"
-                        style={{ wordBreak: 'keep-all', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
-                        {latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}
-                      </p>
-                      {latestNotice?.author && (
-                        <p className="text-[#FACC15] text-[12px] font-black mt-4 opacity-70">— {latestNotice.author} 선생님</p>
-                      )}
-                    </div>
-                  </div>
+                  <p className="text-white font-black leading-[1.15] text-center px-4 
+                                text-[2.5rem] md:text-[3.5rem] lg:text-[clamp(2.8rem,8vh,4.8rem)] tracking-tight"
+                     style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}>
+                    {latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}
+                  </p>
+                  {latestNotice?.author && (
+                    <p className="text-[#FACC15] text-[1.2rem] font-black mt-6 opacity-80 italic">— {latestNotice.author} 선생님</p>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -489,25 +486,27 @@ export default function ChalkboardView() {
               const prevItem = pastNotices[idx];
               return (
                 <motion.div key={idx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + (idx * 0.05) }}
-                  className="bg-[#1A1A1A]/60 rounded-3xl border border-white/5 px-8 flex items-center justify-between shadow-xl backdrop-blur-md relative overflow-hidden group">
-                  <div className="flex items-center gap-6 flex-1 min-w-0">
+                  className="bg-[#1A1A1A]/60 rounded-[32px] border border-white/5 px-10 flex items-center justify-between shadow-xl backdrop-blur-md relative overflow-hidden group">
+                  <div className="flex items-center gap-8 flex-1 min-w-0 h-full">
                     <div className="flex items-center gap-3 shrink-0">
-                      <div className="w-2 h-2 rounded-full bg-blue-500 opacity-50" />
-                      <span className="text-[10px] font-black uppercase tracking-widest text-neutral-600">#{idx + 1}</span>
+                      <div className="w-2.5 h-2.5 rounded-full bg-blue-500/50" />
+                      <span className="text-[12px] font-black uppercase tracking-widest text-neutral-600">#{idx + 1}</span>
                     </div>
                     {prevItem ? (
-                      <div className="flex items-center gap-4 flex-1 min-w-0 overflow-hidden">
-                        <p className="text-neutral-300 font-bold leading-tight group-hover:text-white transition-colors truncate text-base" style={{ wordBreak: 'keep-all' }}>
+                      <div className="flex items-center gap-6 flex-1 min-w-0">
+                        <p className="text-neutral-200 font-bold leading-[1.3] group-hover:text-white transition-colors 
+                                      text-[1.5rem] md:text-[1.8rem] line-clamp-2" 
+                           style={{ wordBreak: 'keep-all' }}>
                           {(prevItem.content || '').replace(/\n+/g, ' ')}
                         </p>
-                        {prevItem.author && <span className="text-[10px] text-neutral-700 font-black shrink-0">— {prevItem.author}</span>}
+                        {prevItem.author && <span className="text-[12px] text-neutral-700 font-black shrink-0 italic">— {prevItem.author}</span>}
                       </div>
                     ) : (
-                      <span className="text-neutral-800 text-[10px] font-black uppercase tracking-widest italic">수신 대기 중</span>
+                      <span className="text-neutral-800 text-[12px] font-black uppercase tracking-widest italic">수신 대기 중...</span>
                     )}
                   </div>
                   {prevItem && (
-                    <span className="text-[10px] font-bold text-neutral-600 bg-white/5 px-3 py-1 rounded-lg ml-4">
+                    <span className="text-[11px] font-bold text-neutral-600 bg-white/5 px-4 py-2 rounded-xl border border-white/5 ml-4">
                       {new Date(prevItem.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   )}
@@ -540,7 +539,6 @@ export default function ChalkboardView() {
                 <button onClick={() => {
                   setShowNotification(false);
                   if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
-                  else if ((document as any).webkitRequestFullscreen) (document as any).webkitRequestFullscreen();
                 }} className="bg-white text-green-600 hover:bg-gray-100 px-6 py-3 rounded-xl font-black transition-all">전체화면</button>
               </div>
             </div>

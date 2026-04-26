@@ -431,7 +431,20 @@ export default function AdminView() {
                 선생님 관리
               </button>
             )}
+            <button 
+              onClick={() => navigate(`/${schoolData.id}/review`, { 
+                state: { 
+                  teacherName: userData?.name || "", 
+                  teacherRole: userData?.role || "teacher", 
+                  schoolName: schoolData?.name || "" 
+                } 
+              })}
+              className="px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all text-neutral-500 hover:text-white"
+            >
+              후기 작성
+            </button>
           </div>
+
           <div className="flex items-center gap-3 pr-2">
             <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">{userData?.name || "사용자"} ({userData?.role === 'admin' ? '관리자' : '교사'})</span>
             <div className="w-1 h-4 bg-white/10 rounded-full" />
@@ -581,6 +594,18 @@ export default function AdminView() {
               선생님 관리
             </button>
           )}
+          <button 
+            onClick={() => navigate(`/${schoolData.id}/review`, { 
+              state: { 
+                teacherName: userData?.name || "", 
+                teacherRole: userData?.role || "teacher", 
+                schoolName: schoolData?.name || "" 
+              } 
+            })}
+            className="px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all text-neutral-500 hover:text-white"
+          >
+            후기 작성
+          </button>
         </div>
         <div className="flex items-center gap-3 pr-2">
           <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">{userData?.name || "사용자"} ({userData?.role === 'admin' ? '관리자' : '교사'})</span>
