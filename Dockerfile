@@ -1,8 +1,9 @@
 FROM node:20-alpine
 WORKDIR /app
 COPY . .
-COPY public/manifest.json dist/manifest.json
 RUN npm install
 RUN npm run build
+COPY public/manifest.json dist/manifest.json
 EXPOSE 3000
-CMD ["npm", "run", "dev"]
+ENV NODE_ENV=production
+CMD ["npx", "tsx", "server.ts"]
