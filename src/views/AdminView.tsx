@@ -432,17 +432,17 @@ export default function AdminView() {
               </button>
             )}
             <button 
-              onClick={() => navigate(`/${schoolData.id}/review`, { 
-                state: { 
-                  teacherName: userData?.name || "", 
-                  teacherRole: userData?.role || "teacher", 
-                  schoolName: schoolData?.name || "" 
-                } 
-              })}
-              className="px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all text-neutral-500 hover:text-white"
-            >
-              후기 작성
-            </button>
+  onClick={() => navigate(`/${schoolData.id}/review`, { 
+    state: { 
+      teacherName: userData?.name || "", 
+      teacherRole: userData?.role || "teacher", 
+      schoolName: schoolData?.name || "" 
+    } 
+  })}
+  className="px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all bg-green-500/20 text-green-400 hover:bg-green-500/30 hover:text-green-300 border border-green-500/50"
+>
+  후기 작성
+</button>
           </div>
 
           <div className="flex items-center gap-3 pr-2">
@@ -595,17 +595,17 @@ export default function AdminView() {
             </button>
           )}
           <button 
-            onClick={() => navigate(`/${schoolData.id}/review`, { 
-              state: { 
-                teacherName: userData?.name || "", 
-                teacherRole: userData?.role || "teacher", 
-                schoolName: schoolData?.name || "" 
-              } 
-            })}
-            className="px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all text-neutral-500 hover:text-white"
-          >
-            후기 작성
-          </button>
+  onClick={() => navigate(`/${schoolData.id}/review`, { 
+    state: { 
+      teacherName: userData?.name || "", 
+      teacherRole: userData?.role || "teacher", 
+      schoolName: schoolData?.name || "" 
+    } 
+  })}
+  className="px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all bg-green-500/20 text-green-400 hover:bg-green-500/30 hover:text-green-300 border border-green-500/50"
+>
+  후기 작성
+</button>
         </div>
         <div className="flex items-center gap-3 pr-2">
           <span className="text-[10px] font-black text-neutral-500 uppercase tracking-widest">{userData?.name || "사용자"} ({userData?.role === 'admin' ? '관리자' : '교사'})</span>
