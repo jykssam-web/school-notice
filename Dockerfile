@@ -1,7 +1,8 @@
 FROM node:18-alpine
 WORKDIR /app
+COPY package*.json ./
+RUN npm install
 COPY . .
-RUN npm ci
 RUN npm run build
 EXPOSE 3000
-CMD ["node", "-e", "require('http').createServer((req, res) => { res.end('ok'); }).listen(3000)"]
+CMD ["npm", "run", "preview"]
