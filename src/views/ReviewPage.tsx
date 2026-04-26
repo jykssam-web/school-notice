@@ -31,47 +31,10 @@ export default function ReviewPage() {
   // 사용할 선생님명 (수정했으면 customName, 아니면 마스킹된 원본)
   const displayName = editName && customName ? customName : maskName(teacherName);
 
-  // 후기 목록 조회
- useEffect(() => {
-  if (!schoolId) {
+// 후기 목록 조회 (임시 비활성화)
+  useEffect(() => {
     setReviews([]);
-    return;
-  }
-
-  try {
-    const q = query(
-      collection(db, "reviews"),
-      where("schoolId", "==", schoolId),
-      where("isPublic", "==", true),
-      orderBy("timestamp", "desc"),
-      limit(10)
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
-        const data = snapshot.docs.map((doc) => {
-          const d = doc.data();
-          return {
-            ...d,
-            id: doc.id,
-            timestamp: d.timestamp?.toDate() || new Date(),
-          };
-        });
-        setReviews(data);
-      },
-      (error) => {
-        console.error("후기 로드 오류:", error);
-        setReviews([]);
-      }
-    );
-
-    return () => unsubscribe();
-  } catch (e) {
-    console.error("후기 구독 오류:", e);
-    setReviews([]);
-  }
-}, [schoolId]);
+  }, [schoolId]);
 
   // 후기 제출
   const handleSubmit = async (e: React.FormEvent) => {
