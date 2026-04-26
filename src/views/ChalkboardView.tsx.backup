@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Bell, Info, Clock, Quote, UtensilsCrossed, Flag, Settings, X, CheckCircle } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Bell, Info, Clock, Quote, UtensilsCrossed, Flag } from "lucide-react";
+import { useParams } from "react-router-dom";
 import { QUOTES } from "../constants/quotes";
 import { db } from "../lib/firebase";
-import { collection, query, orderBy, limit, onSnapshot, collectionGroup, where, doc, getDoc, setDoc } from "firebase/firestore";
-import { getMealInfo, searchSchools } from "../lib/neis";
+import { collection, query, orderBy, limit, onSnapshot, collectionGroup, where, doc, getDoc } from "firebase/firestore";
+import { getMealInfo } from "../lib/neis";
 
 declare global {
   interface Window {
@@ -19,56 +19,27 @@ declare global {
 
 export default function ChalkboardView() {
   const { schoolId, channelId = "common" } = useParams();
-  const navigate = useNavigate();
   const [notices, setNotices] = useState<any[]>([]);
   const [showNotification, setShowNotification] = useState(false);
   const [meal, setMeal] = useState<{ menu: string; cal: string } | null>(null);
   const [dday, setDday] = useState<{ name: string; date: string } | null>(null);
+
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // 설정 모달
-  const [showSettings, setShowSettings] = useState(false);
-  const [schoolCode, setSchoolCode] = useState("");
-  const [orgCode, setOrgCode] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [settingsStatus, setSettingsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [mealDisplayMode, setMealDisplayMode] = useState<"today" | "manual">("today");
-  const [ddayEnabled, setDdayEnabled] = useState(true);
-  const [ddayName, setDdayName] = useState("");
-  const [ddayDate, setDdayDate] = useState("");
-
-  // 시계
   useEffect(() => {
     const clockTimer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(clockTimer);
   }, []);
 
-  // 초기 설정 로드
-  useEffect(() => {
-    if (!schoolId) return;
-    const loadSettings = async () => {
-      try {
-        const schoolDoc = await getDoc(doc(db, 'schools', schoolId));
-        if (schoolDoc.exists()) {
-          const data = schoolDoc.data();
-          if (data.schoolCode && data.orgCode) {
-            setSchoolCode(data.schoolCode);
-            setOrgCode(data.orgCode);
-          }
-        }
-      } catch (e) {
-        console.error('설정 로드 오류:', e);
-      }
-    };
-    loadSettings();
-  }, [schoolId]);
-
   // 급식 불러오기
   useEffect(() => {
-    if (!schoolId || !schoolCode || !orgCode) return;
+    if (!schoolId) return;
     const fetchMeal = async () => {
       try {
+        const schoolDoc = await getDoc(doc(db, 'schools', schoolId));
+        if (!schoolDoc.exists()) return;
+        const { schoolCode, orgCode } = schoolDoc.data();
+        if (!schoolCode || !orgCode) return;
         const mealData = await getMealInfo(schoolCode, orgCode);
         setMeal(mealData);
       } catch (e) {
@@ -76,7 +47,7 @@ export default function ChalkboardView() {
       }
     };
     fetchMeal();
-  }, [schoolId, schoolCode, orgCode]);
+  }, [schoolId]);
 
   // 디데이 불러오기
   useEffect(() => {
@@ -85,10 +56,7 @@ export default function ChalkboardView() {
       try {
         const ddayDoc = await getDoc(doc(db, 'schools', schoolId, 'channels', channelId, 'settings', 'dday'));
         if (ddayDoc.exists()) {
-          const data = ddayDoc.data() as { name: string; date: string };
-          setDday(data);
-          setDdayName(data.name);
-          setDdayDate(data.date);
+          setDday(ddayDoc.data() as { name: string; date: string });
         }
       } catch (e) {
         console.error('디데이 로딩 오류:', e);
@@ -109,7 +77,6 @@ export default function ChalkboardView() {
     return `D+${Math.abs(diff)}`;
   };
 
-  // 공지 구독
   useEffect(() => {
     if (!schoolId || !channelId) return;
 
@@ -157,62 +124,6 @@ export default function ChalkboardView() {
     return () => unsubscribe();
   }, [schoolId, channelId]);
 
-  // 학교 검색
-  const handleSchoolSearch = async () => {
-    if (!searchQuery.trim()) return;
-    setSettingsStatus("loading");
-    try {
-      const results = await searchSchools(searchQuery);
-      setSearchResults(results);
-      setSettingsStatus("idle");
-    } catch (e) {
-      console.error('검색 오류:', e);
-      setSettingsStatus("error");
-    }
-  };
-
-  // 학교 선택
-  const handleSelectSchool = async (school: any) => {
-    if (!schoolId) return;
-    setSettingsStatus("loading");
-    try {
-      await setDoc(doc(db, 'schools', schoolId), {
-        schoolCode: school.code,
-        orgCode: school.orgCode,
-        name: school.name
-      }, { merge: true });
-      
-      setSchoolCode(school.code);
-      setOrgCode(school.orgCode);
-      setSettingsStatus("success");
-      setTimeout(() => {
-        setShowSettings(false);
-        setSettingsStatus("idle");
-      }, 1500);
-    } catch (e) {
-      console.error('저장 오류:', e);
-      setSettingsStatus("error");
-    }
-  };
-
-  // 디데이 저장
-  const handleSaveDday = async () => {
-    if (!schoolId || channelId === 'common' || !ddayName || !ddayDate) return;
-    setSettingsStatus("loading");
-    try {
-      await setDoc(
-        doc(db, 'schools', schoolId, 'channels', channelId, 'settings', 'dday'),
-        { name: ddayName, date: ddayDate }
-      );
-      setDday({ name: ddayName, date: ddayDate });
-      setSettingsStatus("success");
-      setTimeout(() => setSettingsStatus("idle"), 2000);
-    } catch (e) {
-      console.error('디데이 저장 오류:', e);
-      setSettingsStatus("error");
-    }
-  };
-
   const formattedDate = currentTime.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
 
   const getDailyQuote = () => {
@@ -237,135 +148,6 @@ export default function ChalkboardView() {
       <div className="absolute inset-0 opacity-10 pointer-events-none"
         style={{ backgroundImage: 'radial-gradient(circle, #333333 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
 
-      {/* 설정 버튼 */}
-      <button
-        onClick={() => setShowSettings(true)}
-        className="fixed top-6 right-6 z-40 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 p-3 rounded-2xl transition-all text-blue-400 hover:text-blue-300"
-        title="급식/디데이 설정"
-      >
-        <Settings size={20} />
-      </button>
-
-      {/* 설정 모달 */}
-      <AnimatePresence>
-        {showSettings && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-            onClick={() => setShowSettings(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#1A1A1A] rounded-[32px] p-8 max-w-md w-full border border-white/5 shadow-2xl"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-black">급식 & 디데이 설정</h2>
-                <button
-                  onClick={() => setShowSettings(false)}
-                  className="p-1 hover:bg-white/10 rounded-lg transition-all"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              {/* 학교 설정 */}
-              <div className="space-y-4 mb-6">
-                <div>
-                  <label className="text-xs font-black uppercase text-neutral-500 mb-2 block">학교 검색</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="학교명 입력"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSchoolSearch()}
-                      className="flex-1 px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:border-blue-500 outline-none transition-all"
-                    />
-                    <button
-                      onClick={handleSchoolSearch}
-                      disabled={settingsStatus === "loading"}
-                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-xl font-black text-xs disabled:opacity-50 transition-all"
-                    >
-                      검색
-                    </button>
-                  </div>
-                </div>
-
-                {/* 검색 결과 */}
-                {searchResults.length > 0 && (
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {searchResults.map((school) => (
-                      <button
-                        key={school.code}
-                        onClick={() => handleSelectSchool(school)}
-                        disabled={settingsStatus === "loading"}
-                        className="w-full text-left p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-blue-500 transition-all text-sm disabled:opacity-50"
-                      >
-                        <p className="font-bold">{school.name}</p>
-                        <p className="text-xs text-neutral-500">{school.address}</p>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* 현재 설정된 학교 */}
-                {schoolCode && (
-                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30">
-                    <p className="text-xs font-bold text-blue-400">학교 코드</p>
-                    <p className="text-sm text-blue-300">{schoolCode}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* 디데이 설정 */}
-              <div className="space-y-4 mb-6 p-4 rounded-xl bg-orange-500/10 border border-orange-500/30">
-                <div>
-                  <label className="text-xs font-black uppercase text-orange-600 mb-2 block">디데이 이름</label>
-                  <input
-                    type="text"
-                    placeholder="예: 중간고사"
-                    value={ddayName}
-                    onChange={(e) => setDdayName(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:border-orange-500 outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-black uppercase text-orange-600 mb-2 block">날짜</label>
-                  <input
-                    type="date"
-                    value={ddayDate}
-                    onChange={(e) => setDdayDate(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 focus:border-orange-500 outline-none transition-all"
-                  />
-                </div>
-                <button
-                  onClick={handleSaveDday}
-                  disabled={settingsStatus === "loading" || !ddayName || !ddayDate}
-                  className={`w-full py-2 rounded-xl font-black text-sm transition-all ${
-                    settingsStatus === "success"
-                      ? "bg-green-500 text-white"
-                      : "bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-50"
-                  }`}
-                >
-                  {settingsStatus === "loading" ? "저장 중..." : settingsStatus === "success" ? "✓ 저장 완료" : "디데이 저장"}
-                </button>
-              </div>
-
-              {settingsStatus === "error" && (
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold">
-                  오류가 발생했습니다. 다시 시도해주세요.
-                </div>
-              )}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="max-w-[1920px] w-full grid grid-cols-12 grid-rows-12 gap-8 h-[90vh] z-10">
 
         {/* 왼쪽 컬럼 */}
@@ -376,20 +158,27 @@ export default function ChalkboardView() {
             className="row-span-3 bg-[#1A1A1A] rounded-[56px] border border-white/5 p-8 flex flex-col items-center justify-between shadow-2xl relative overflow-hidden">
             <div className="absolute top-[-100px] left-[-100px] w-96 h-96 bg-blue-500/5 rounded-full blur-[120px]" />
             <div className="flex flex-col items-center">
-              <Clock size={24} className="text-blue-400 mb-3" />
-              <h3 className="text-[10px] font-black tracking-[0.2em] text-neutral-600 uppercase mb-4">현재 시간</h3>
+              <h1 className="text-[2.5rem] md:text-[3.5rem] font-black leading-none tracking-tighter text-white tabular-nums flex items-baseline gap-1">
+                {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
+                <span className="text-blue-500 animate-pulse mx-1">:</span>
+                <span className="text-xl md:text-2xl opacity-20">{currentTime.getSeconds().toString().padStart(2, '0')}</span>
+              </h1>
+              <p className="text-sm font-black mt-2 text-neutral-500 tracking-tight text-center">{formattedDate}</p>
             </div>
-            <div className="flex flex-col items-center text-center">
-              <div className="text-5xl md:text-6xl font-black text-white tracking-tighter">
-                {currentTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-              </div>
-              <div className="text-xs md:text-sm text-neutral-600 font-black mt-4 uppercase tracking-widest">{formattedDate}</div>
+            <div className="flex items-center gap-2">
+              <Info size={13} className="text-[#3B82F6]" />
+              <span className="text-[11px] font-black text-neutral-500 uppercase tracking-widest">
+                {channelId !== "common" && channelId.length === 3
+                  ? `${channelId.charAt(0)}학년 ${parseInt(channelId.substring(1))}반`
+                  : channelId === "common" ? "전체 공통" : `${channelId} 채널`}
+              </span>
             </div>
           </motion.div>
 
-          {/* 급식 및 디데이 */}
-          <motion.div initial={{ x: -30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 }}
-            className="row-span-4 flex flex-col gap-4">
+          {/* 급식 + 디데이 (좌우 반반) */}
+          <motion.div initial={{ x: -30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.05 }}
+            className="row-span-4 flex gap-4">
+
             {/* 급식 */}
             <div className="flex-1 bg-[#1A1A1A] rounded-[40px] border border-white/5 px-4 pt-4 pb-5 flex flex-col shadow-2xl relative overflow-hidden">
               <div className="absolute bottom-[-60px] right-[-60px] w-48 h-48 bg-orange-500/5 rounded-full blur-[80px]" />
