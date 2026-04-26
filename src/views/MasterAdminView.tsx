@@ -1,249 +1,293 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { ShieldAlert, Plus, School, Trash2, Key, LogOut, CheckCircle, Smartphone, Globe } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { db } from "../lib/firebase";
-import { collection, getDocs, setDoc, doc, deleteDoc, query, orderBy } from "firebase/firestore";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { addSchool, getSchools, updateSchool, deleteSchool, School } from '../lib/masterAdmin';
+import { searchSchools } from "../lib/neis";
+const MASTER_PASSWORD = 'rhdwlsms0!';
 
 export default function MasterAdminView() {
   const navigate = useNavigate();
-  const [isAuth, setIsAuth] = useState(false);
-  const [password, setPassword] = useState("");
-  const [schools, setSchools] = useState<any[]>([]);
-  const [loginError, setLoginError] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [password, setPassword] = useState('');
+  const [schools, setSchools] = useState<School[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [schoolName, setSchoolName] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
-  // New School Form
-  const [newName, setNewName] = useState("");
-  const [newId, setNewId] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newAdminId, setNewAdminId] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [formData, setFormData] = useState({
+    name: '',
+    schoolId: '',
+    schoolPassword: '',
+    adminId: '',
+    schoolCode: '',
+    orgCode: '', // NEIS 학교 코드
+  });
 
-  const fetchSchools = async () => {
-    try {
-      const q = query(collection(db, "schools"), orderBy("name"));
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setSchools(data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleMasterLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Master password check (can still be local/env based for now)
-    const correctMasterPassword = "master1234";
-    if (password === correctMasterPassword) {
-      setIsAuth(true);
-      fetchSchools();
+  // 로그인
+  const handleLogin = () => {
+    if (password === MASTER_PASSWORD) {
+      setIsLoggedIn(true);
+      loadSchools();
+      setPassword('');
     } else {
-      setLoginError(true);
-      setPassword("");
+      alert('비밀번호가 틀렸습니다!');
+      setPassword('');
     }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("loading");
+  // 학교 목록 로드
+  const loadSchools = async () => {
     try {
-      await setDoc(doc(db, "schools", newId), {
-        id: newId,
-        name: newName,
-        schoolPassword: newPassword,
-        adminId: newAdminId || "admin"
-      });
-      
-      setStatus("success");
-      fetchSchools();
-      setNewName("");
-      setNewId("");
-      setNewPassword("");
-      setNewAdminId("");
-      setTimeout(() => setStatus("idle"), 2000);
-    } catch (e) {
-      console.error(e);
-      alert("등록 실패");
-      setStatus("idle");
+      const schoolsList = await getSchools();
+      setSchools(schoolsList);
+    } catch (error) {
+      alert('학교 목록을 불러올 수 없습니다.');
     }
   };
 
-  if (!isAuth) {
+  // 학교 검색
+  const handleSearchSchool = async () => {
+    if (!schoolName.trim()) {
+      alert('학교명을 입력하세요!');
+      return;
+    }
+    setIsSearching(true);
+    const results = await searchSchools(schoolName);
+    setSearchResults(results);
+    setIsSearching(false);
+  };
+
+  // 검색된 학교 선택
+  const handleSelectSchool = (school: any) => {
+    setFormData({
+      ...formData,
+      name: school.name,
+      schoolCode: school.code,
+      orgCode: school.orgCode,
+    });
+    setSearchResults([]);
+    setSchoolName("");
+  };
+
+  // 새 학교 추가
+  const handleAddSchool = async () => {
+    if (!formData.name || !formData.schoolId || !formData.schoolPassword || !formData.adminId) {
+      alert('모든 필드를 입력하세요!');
+      return;
+    }
+
+    try {
+      await addSchool({
+        ...formData,
+        id: formData.schoolId,
+        createdAt: new Date().toISOString(),
+      });
+      alert('학교가 추가되었습니다!');
+      setFormData({ name: '', schoolId: '', schoolPassword: '', adminId: '', schoolCode: '' });
+      setShowAddForm(false);
+      loadSchools();
+    } catch (error) {
+      alert('학교 추가에 실패했습니다.');
+    }
+  };
+
+  // 학교 삭제
+  const handleDeleteSchool = async (schoolId: string) => {
+    if (window.confirm('정말 삭제하시겠습니까?')) {
+      try {
+        await deleteSchool(schoolId);
+        alert('학교가 삭제되었습니다!');
+        loadSchools();
+      } catch (error) {
+        alert('학교 삭제에 실패했습니다.');
+      }
+    }
+  };
+
+  if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6 text-white font-sans">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-md w-full bg-neutral-900 p-10 rounded-[40px] border border-white/5 text-center shadow-2xl"
-        >
-          <div className="w-16 h-16 bg-red-600/20 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <ShieldAlert size={32} />
-          </div>
-          <h1 className="text-2xl font-black mb-2 uppercase tracking-tighter">Business Console</h1>
-          <p className="text-neutral-500 text-sm mb-8 font-bold">마스터 비밀번호를 입력하십시오.</p>
-          <form onSubmit={handleMasterLogin} className="space-y-4">
-            <input 
-              type="password"
-              placeholder="Master Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 px-6 py-4 rounded-2xl outline-none focus:border-red-500 transition-all font-mono text-center text-lg"
-              autoFocus
-            />
-            {loginError && <p className="text-red-500 text-xs font-bold">Access Denied.</p>}
-            <button className="w-full bg-red-600 hover:bg-neutral-100 hover:text-black py-4 rounded-2xl font-black transition-all">
-              UNLOCK CONSOLE
-            </button>
-          </form>
-        </motion.div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+          <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">마스터 관리자</h1>
+          
+          <input
+            type="password"
+            placeholder="마스터 비밀번호"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
+          />
+
+          <button
+            onClick={handleLogin}
+            className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            로그인
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] p-6 md:p-12 text-white font-sans">
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
-        {/* Header */}
-        <div className="col-span-12 flex justify-between items-center mb-8 bg-neutral-900/50 p-8 rounded-[32px] border border-white/5">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center text-white">
-              <ShieldAlert size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tighter uppercase leading-none">SaaS Admin Center</h1>
-              <p className="text-xs font-bold text-neutral-600 uppercase tracking-widest mt-1">School Accounts & Security Management</p>
-            </div>
-          </div>
-          <button onClick={() => setIsAuth(false)} className="text-neutral-500 hover:text-white flex items-center gap-2 font-bold text-xs">
-            <LogOut size={16} /> EXIT CONSOLE
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold text-gray-800">학교 관리</h1>
+          <button
+            onClick={() => {
+              setIsLoggedIn(false);
+              navigate('/admin');
+            }}
+            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition"
+          >
+            로그아웃
           </button>
         </div>
 
-        {/* School Factory (Register) */}
-        <div className="col-span-12 md:col-span-4 space-y-6">
-          <div className="bg-neutral-900 p-8 rounded-[40px] border border-white/5 shadow-2xl">
-            <div className="flex items-center gap-2 mb-8">
-              <Plus className="text-red-500" size={20} />
-              <h2 className="text-sm font-black uppercase tracking-widest text-neutral-400">신규 학교 등록</h2>
+        {/* 학교 추가 버튼 */}
+        <button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition mb-6"
+        >
+          {showAddForm ? '취소' : '새 학교 추가'}
+        </button>
+
+        {/* 학교 추가 폼 */}
+        {showAddForm && (
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">새 학교 추가</h2>
+            
+            {/* 학교 검색 */}
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                1단계: 학교 검색
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="학교명 입력 (예: 서전중학교)"
+                  value={schoolName}
+                  onChange={(e) => setSchoolName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearchSchool()}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
+                />
+                <button
+                  onClick={handleSearchSchool}
+                  disabled={isSearching}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400"
+                >
+                  {isSearching ? '검색중...' : '검색'}
+                </button>
+              </div>
+
+              {/* 검색 결과 */}
+              {searchResults.length > 0 && (
+                <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+                  {searchResults.map((school, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSelectSchool(school)}
+                      className="w-full text-left p-3 bg-white border border-gray-300 rounded-lg hover:bg-blue-100 transition"
+                    >
+                      <p className="font-semibold text-gray-800">{school.name}</p>
+                      <p className="text-xs text-gray-600">{school.address}</p>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {searchResults.length === 0 && schoolName && !isSearching && (
+                <p className="mt-2 text-sm text-red-600">검색 결과가 없습니다.</p>
+              )}
             </div>
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-neutral-600 ml-2">학교 명칭</label>
-                <input 
-                  required
-                  placeholder="예: 서전고등학교"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 px-5 py-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold"
-                />
+
+            {/* 선택된 학교 정보 */}
+            {formData.name && (
+              <div className="mb-6 p-4 bg-green-50 rounded-lg">
+                <p className="text-sm font-bold text-gray-700">선택된 학교:</p>
+                <p className="text-lg font-semibold text-green-600">{formData.name}</p>
               </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-neutral-600 ml-2">학교 아이디 (Slug)</label>
-                <input 
-                  required
-                  placeholder="예: sjhs"
-                  value={newId}
-                  onChange={(e) => setNewId(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 px-5 py-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-mono font-bold"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-neutral-600 ml-2">관리자 비밀번호 (학교 공용)</label>
-                <input 
-                  required
-                  type="password"
-                  placeholder="예: 1234"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 px-5 py-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase text-neutral-600 ml-2">정보부장 아이디 (Admin ID)</label>
-                <input 
-                  required
-                  placeholder="예: admin"
-                  value={newAdminId}
-                  onChange={(e) => setNewAdminId(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 px-5 py-4 rounded-2xl outline-none focus:border-blue-500 transition-all font-bold"
-                />
-              </div>
-              <button 
-                type="submit"
-                disabled={status === "loading"}
-                className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all ${
-                  status === "success" ? "bg-emerald-500 text-white" : "bg-blue-600 text-white hover:bg-white hover:text-black"
-                }`}
-              >
-                {status === "loading" ? "Processing..." : status === "success" ? "Registered!" : "Create School Account"}
-              </button>
-            </form>
+            )}
+
+            {/* 추가 정보 입력 */}
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              2단계: 추가 정보 입력
+            </label>
+
+            <input
+              type="text"
+              placeholder="학교 ID (예: sjms)"
+              value={formData.schoolId}
+              onChange={(e) => setFormData({ ...formData, schoolId: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
+            />
+
+            <input
+              type="text"
+              placeholder="학교 비밀번호"
+              value={formData.schoolPassword}
+              onChange={(e) => setFormData({ ...formData, schoolPassword: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
+            />
+
+            <input
+              type="text"
+              placeholder="관리자 ID"
+              value={formData.adminId}
+              onChange={(e) => setFormData({ ...formData, adminId: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-black"
+            />
+
+            <button
+              onClick={handleAddSchool}
+              className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+            >
+              추가
+            </button>
           </div>
+        )}
+
+        {/* 학교 목록 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {schools.map((school) => (
+            <div key={school.id} className="bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-xl font-bold text-gray-800 mb-2">{school.name}</h3>
+              
+              <div className="text-sm text-gray-600 mb-4 space-y-1">
+                <p><span className="font-semibold">학교 ID:</span> {school.schoolId}</p>
+                <p><span className="font-semibold">비밀번호:</span> {school.schoolPassword}</p>
+                <p><span className="font-semibold">관리자 ID:</span> {school.adminId}</p>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/${school.schoolId}/admin`;
+                    window.open(url, '_blank');
+                  }}
+                  className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+                >
+                  접속
+                </button>
+                <button
+                  onClick={() => handleDeleteSchool(school.id)}
+                  className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition text-sm"
+                >
+                  삭제
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* School List */}
-        <div className="col-span-12 md:col-span-8">
-          <div className="bg-neutral-900 p-8 rounded-[40px] border border-white/5 shadow-2xl min-h-[500px]">
-             <div className="flex items-center justify-between mb-8">
-               <div className="flex items-center gap-2 text-neutral-400">
-                 <School size={20} />
-                 <h2 className="text-sm font-black uppercase tracking-widest">수익 창출 중인 학교 목록</h2>
-               </div>
-               <span className="text-[10px] font-black bg-white/5 px-3 py-1 rounded-full text-neutral-500">{schools.length} Schools Active</span>
-             </div>
-
-             <div className="space-y-4">
-               {schools.map((school) => (
-                 <motion.div 
-                   layout
-                   key={school.id}
-                   className="flex items-center justify-between p-6 bg-white/[0.02] rounded-3xl border border-white/5 hover:bg-white/[0.05] transition-all"
-                 >
-                   <div className="flex items-center gap-4">
-                     <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-neutral-400">
-                       <School size={20} />
-                     </div>
-                     <div>
-                       <h3 className="text-lg font-black">{school.name}</h3>
-                       <div className="flex items-center gap-3 mt-1">
-                         <span className="text-[10px] font-mono text-blue-500 font-black uppercase">ID: {school.id}</span>
-                         <span className="text-[10px] font-mono text-neutral-600 font-bold uppercase">PW: {school.schoolPassword}</span>
-                          <span className="text-[10px] font-mono text-amber-500 font-black uppercase">ADMIN: {school.adminId}</span>
-                       </div>
-                     </div>
-                   </div>
-                   
-                   <div className="flex items-center gap-2">
-                     <button 
-                        onClick={() => window.open(`/${school.id}/admin`, "_blank")}
-                        className="p-3 bg-white/5 hover:bg-blue-600 rounded-xl text-neutral-500 hover:text-white transition-all"
-                        title="관리자 페이지"
-                     >
-                       <Key size={16} />
-                     </button>
-                     <button 
-                        onClick={() => window.open(`/${school.id}`, "_blank")}
-                        className="p-3 bg-white/5 hover:bg-emerald-600 rounded-xl text-neutral-500 hover:text-white transition-all"
-                        title="학생용 랜딩"
-                     >
-                       <Globe size={16} />
-                     </button>
-                   </div>
-                 </motion.div>
-               ))}
-               
-               {schools.length === 0 && (
-                 <div className="text-center py-20 text-neutral-700 italic font-medium">
-                   아직 등록된 학교가 없습니다. 상공의 기회를 잡으세요!
-                 </div>
-               )}
-             </div>
+        {schools.length === 0 && (
+          <div className="text-center text-gray-500 mt-10">
+            <p className="text-xl">등록된 학교가 없습니다.</p>
+            <p className="mt-2">새 학교를 추가해주세요.</p>
           </div>
-        </div>
-      </div>
-      
-      <div className="mt-12 text-center text-neutral-700">
-        <p className="text-[10px] font-black uppercase tracking-[0.4em]">CampusNotice Master Control v1.0.0</p>
+        )}
       </div>
     </div>
   );

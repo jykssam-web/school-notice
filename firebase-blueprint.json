@@ -1,0 +1,56 @@
+{
+  "entities": {
+    "School": {
+      "title": "School",
+      "description": "Educational institution using the system",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the school" },
+        "name": { "type": "string", "description": "Name of the school" },
+        "schoolPassword": { "type": "string", "description": "Password used for initial school-level authentication" },
+        "adminId": { "type": "string", "description": "Administrator ID for management" }
+      },
+      "required": ["id", "name", "schoolPassword", "adminId"]
+    },
+    "Teacher": {
+      "title": "Teacher",
+      "description": "Authorized teacher within a school",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full name of the teacher" },
+        "schoolId": { "type": "string", "description": "ID of the school this teacher belongs to" }
+      },
+      "required": ["name", "schoolId"]
+    },
+    "Notice": {
+      "title": "Notice",
+      "description": "A notice broadcasted to a specific channel",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "schoolId": { "type": "string" },
+        "channelId": { "type": "string" },
+        "title": { "type": "string", "description": "Subject or teacher name" },
+        "content": { "type": "string", "description": "Notice message" },
+        "authorName": { "type": "string" },
+        "authorId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["schoolId", "channelId", "title", "content", "timestamp"]
+    }
+  },
+  "firestore": {
+    "schools/{schoolId}": {
+      "schema": "School",
+      "description": "Store school configuration"
+    },
+    "schools/{schoolId}/teachers/{teacherName}": {
+      "schema": "Teacher",
+      "description": "Store authorized teacher names"
+    },
+    "schools/{schoolId}/channels/{channelId}/notices/{noticeId}": {
+      "schema": "Notice",
+      "description": "Store notices for each class or common channel"
+    }
+  }
+}
