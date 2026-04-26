@@ -1,20 +1,7 @@
-FROM node:20-alpine
-
+FROM node:18-alpine
 WORKDIR /app
-
 COPY . .
-
 RUN npm install
-
 RUN npm run build
-
-RUN cp public/manifest.json dist/manifest.json || true
-
-EXPOSE 8080
-
-ENV NODE_ENV=production
-ENV PORT=8080
-
-RUN npm install -g tsx
-
-CMD ["tsx", "server.ts"]
+EXPOSE 3000
+CMD ["npm", "run", "preview"]
