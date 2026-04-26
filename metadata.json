@@ -1,0 +1,6 @@
+{
+  "name": "CampusNotice: Real-time Electronic Chalkboard",
+  "description": "A real-time school notice system that allows the teacher's office to instantly display notices on classroom electronic chalkboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

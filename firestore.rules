@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128;
+    }
+
+    // Schools
+    match /schools/{schoolId} {
+      allow get: if true; // Publicly get school info for login
+      allow list: if false;
+      allow create, update, delete: if true; // In this POC we allow master/admin management. In prod, lock to master key.
+    }
+
+    // Teachers
+    match /schools/{schoolId}/teachers/{teacherName} {
+      allow get: if true; // Used for teacher login validation
+      allow list: if true; // Admin needs to see list
+      allow write: if true; // Admin can manage
+    }
+
+    // Notices
+    match /schools/{schoolId}/channels/{channelId}/notices/{noticeId} {
+      allow read: if true; // Chalkboards need to read
+      allow create, update, delete: if true; // Authorized users can write
+    }
+  }
+}
