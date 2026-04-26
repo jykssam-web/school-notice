@@ -467,9 +467,9 @@ export default function ChalkboardView() {
                   <h2 className="text-[#FACC15]/30 text-[12px] font-black uppercase italic mb-4 tracking-widest">
                     {latestNotice?.title || "최근 소식"}
                   </h2>
-                  <p className="text-white font-black leading-[1.15] text-center px-4 
-                                text-[2.5rem] md:text-[3.5rem] lg:text-[clamp(2.8rem,8vh,4.8rem)] tracking-tight"
-                     style={{ wordBreak: 'keep-all', overflowWrap: 'break-word' }}>
+                  {/* 글자 크기를 이전 공지 리스트와 동일한 text-[1.5rem] md:text-[1.8rem]로 수정 */}
+                  <p className="text-white font-bold leading-[1.4] text-center px-10 text-[1.5rem] md:text-[1.8rem]"
+                     style={{ wordBreak: 'keep-all', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
                     {latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}
                   </p>
                   {latestNotice?.author && (
@@ -479,7 +479,7 @@ export default function ChalkboardView() {
               </AnimatePresence>
             </div>
           </motion.div>
-
+          
           {/* 이전 공지 */}
           <div className="row-span-8 grid grid-cols-1 grid-rows-4 gap-4">
             {[0, 1, 2, 3].map((idx) => {
