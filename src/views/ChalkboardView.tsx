@@ -432,7 +432,7 @@ export default function ChalkboardView() {
         {/* 오른쪽 컬럼 */}
         <div className="col-span-12 lg:col-span-9 row-span-12 grid grid-rows-12 gap-8">
 
-          {/* 최신 공지 */}
+        {/* 최신 공지 */}
           <motion.div initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}
             className="row-span-4 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-8 flex flex-col shadow-2xl relative overflow-hidden">
             <div className="flex items-center justify-between mb-4">
@@ -451,18 +451,16 @@ export default function ChalkboardView() {
                   <h2 className="text-[#FACC15]/30 text-[12px] font-black uppercase italic mb-4 tracking-widest">
                     {latestNotice?.title || "최근 소식"}
                   </h2>
-                  <p className="text-white font-bold leading-[1.4] text-center px-10 text-[1.5rem] md:text-[1.8rem]"
+                  <p className="text-white font-bold leading-[1.4] text-center px-10 text-[3rem] md:text-[3.6rem]"
                      style={{ wordBreak: 'keep-all', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
-                    {latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}
+                    <span className="text-amber-300">{latestNotice?.author || ""}</span>
+                    <span className="ml-4">{latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}</span>
                   </p>
-                  {latestNotice?.author && (
-                    <p className="text-[#FACC15] text-[1.1rem] font-black mt-6 opacity-80 italic">— {latestNotice.author} 선생님</p>
-                  )}
                 </motion.div>
               </AnimatePresence>
             </div>
           </motion.div>
-
+          
           {/* 이전 공지 */}
           <div className="row-span-8 grid grid-cols-1 grid-rows-4 gap-4">
             {[0, 1, 2, 3].map((idx) => {
