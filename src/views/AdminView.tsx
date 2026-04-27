@@ -467,36 +467,31 @@ export default function AdminView() {
             <motion.div key="grade-select" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }}
               className="max-w-4xl w-full flex flex-col items-center gap-12 relative z-10">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-                <button onClick={() => setSelectedGrade(1)}
-                  className="bg-[#1A1A1A] p-12 rounded-[48px] border border-white/5 shadow-2xl hover:border-blue-500/50 hover:-translate-y-1 transition-all group flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                    <span className="text-blue-500 group-hover:text-white font-black text-3xl">1</span>
-                  </div>
-                  <span className="font-black text-2xl text-white">1학년</span>
-                  <span className="text-xs font-bold text-neutral-600 uppercase tracking-widest">14 Classes</span>
-                </button>
-                <button onClick={() => setSelectedGrade(2)}
-                  className="bg-[#1A1A1A] p-12 rounded-[48px] border border-white/5 shadow-2xl hover:border-emerald-500/50 hover:-translate-y-1 transition-all group flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center group-hover:bg-emerald-600 transition-colors">
-                    <span className="text-emerald-600 group-hover:text-white font-black text-3xl">2</span>
-                  </div>
-                  <span className="font-black text-2xl text-white">2학년</span>
-                  <span className="text-xs font-bold text-neutral-600 uppercase tracking-widest">14 Classes</span>
-                </button>
-                <button onClick={() => handleClassToggle("common")}
-                  className={`p-12 rounded-[48px] shadow-2xl hover:-translate-y-1 transition-all group flex flex-col items-center gap-4 relative ${selectedChannels.includes("common") ? "ring-4 ring-blue-500 bg-blue-600/10 border-blue-500 text-white" : "bg-white text-[#111111]"}`}>
-                  {selectedChannels.includes("common") && (
-                    <div className="absolute top-6 right-6 text-blue-500">
-                      <CheckCircle2 size={32} fill="currentColor" className="text-white" />
-                    </div>
-                  )}
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all ${selectedChannels.includes("common") ? "bg-white/10" : "bg-[#111111]/5"}`}>
-                    <Smartphone size={32} />
-                  </div>
-                  <span className="font-black text-2xl">전체 공지</span>
-                  <span className={`text-xs font-bold uppercase tracking-widest ${selectedChannels.includes("common") ? "text-blue-300" : "text-[#111111]/40"}`}>Global Broadcast</span>
-                </button>
-              </div>
+  <button onClick={() => setSelectedGrade(1)}
+    className="bg-[#1A1A1A] p-12 rounded-[48px] border border-white/5 shadow-2xl hover:border-blue-500/50 hover:-translate-y-1 transition-all group flex flex-col items-center gap-4">
+    <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+      <span className="text-blue-500 group-hover:text-white font-black text-3xl">1</span>
+    </div>
+    <span className="font-black text-2xl text-white">1학년</span>
+    <span className="text-xs font-bold text-neutral-600 uppercase tracking-widest">16 Classes</span>
+  </button>
+  <button onClick={() => setSelectedGrade(2)}
+    className="bg-[#1A1A1A] p-12 rounded-[48px] border border-white/5 shadow-2xl hover:border-emerald-500/50 hover:-translate-y-1 transition-all group flex flex-col items-center gap-4">
+    <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center group-hover:bg-emerald-600 transition-colors">
+      <span className="text-emerald-600 group-hover:text-white font-black text-3xl">2</span>
+    </div>
+    <span className="font-black text-2xl text-white">2학년</span>
+    <span className="text-xs font-bold text-neutral-600 uppercase tracking-widest">16 Classes</span>
+  </button>
+  <button onClick={() => setSelectedGrade(3)}
+    className="bg-[#1A1A1A] p-12 rounded-[48px] border border-white/5 shadow-2xl hover:border-rose-500/50 hover:-translate-y-1 transition-all group flex flex-col items-center gap-4">
+    <div className="w-16 h-16 bg-rose-500/10 rounded-2xl flex items-center justify-center group-hover:bg-rose-600 transition-colors">
+      <span className="text-rose-600 group-hover:text-white font-black text-3xl">3</span>
+    </div>
+    <span className="font-black text-2xl text-white">3학년</span>
+    <span className="text-xs font-bold text-neutral-600 uppercase tracking-widest">16 Classes</span>
+  </button>
+</div>
               {selectedChannels.length > 0 && (
                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full flex justify-center">
                   <button onClick={startMultiSend}

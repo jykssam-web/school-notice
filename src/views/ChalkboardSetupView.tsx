@@ -110,8 +110,8 @@ export default function ChalkboardSetupView() {
             >
               <option value="">선택하세요</option>
               {[1, 2, 3].map((grade) => (
-                <optgroup key={grade} label={`${grade}학년`}>
-                  {Array.from({ length: 14 }, (_, i) => i + 1).map((classNum) => (
+  <optgroup key={grade} label={`${grade}학년`}>
+    {Array.from({ length: 16 }, (_, i) => i + 1).map((classNum) => (
                     <option key={`class${grade}${classNum.toString().padStart(2, '0')}`} value={`class${grade}${classNum.toString().padStart(2, '0')}`}>
                       {grade}학년 {classNum}반
                     </option>
