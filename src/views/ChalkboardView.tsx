@@ -424,8 +424,8 @@ export default function ChalkboardView() {
           <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
             className="row-span-3 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group shadow-2xl">
             <Quote className="text-blue-500/10 mb-2" size={20} />
-            <p className="text-sm md:text-base font-bold leading-snug text-neutral-400 italic mb-3 line-clamp-2">"{dailyQuote.text}"</p>
-            <p className="text-[10px] font-black text-blue-500/50 uppercase tracking-widest">{dailyQuote.author}</p>
+            <p className="text-lg md:text-2xl font-bold leading-snug text-neutral-400 italic mb-3 line-clamp-2">"{dailyQuote.text}"</p>
+            <p className="text-[12px] font-black text-blue-500/50 uppercase tracking-widest">{dailyQuote.author}</p>
           </motion.div>
         </div>
 
