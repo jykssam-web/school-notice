@@ -402,7 +402,7 @@ export default function AdminView() {
   const currentGradeClasses = selectedGrade
     ? [
         { id: `${selectedGrade}00`, label: `${selectedGrade}학년 전체`, isTotal: true },
-        ...Array.from({ length: 14 }, (_, i) => ({
+        ...Array.from({ length: 16 }, (_, i) => ({
           id: `${selectedGrade * 100 + (i + 1)}`,
           label: `${selectedGrade}학년 ${i + 1}반`,
           isTotal: false
