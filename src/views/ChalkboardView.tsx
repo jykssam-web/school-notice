@@ -451,16 +451,25 @@ export default function ChalkboardView() {
                   <h2 className="text-[#FACC15]/30 text-[12px] font-black uppercase italic mb-4 tracking-widest">
                     {latestNotice?.title || "최근 소식"}
                   </h2>
-                  <p className="text-white font-bold leading-[1.4] text-center px-10 text-[3rem] md:text-[3.6rem]"
-                     style={{ wordBreak: 'keep-all', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
-                    <span className="text-amber-300">{latestNotice?.author || ""}</span>
-                    <span className="ml-4">{latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}</span>
+                  <p className="text-white font-bold text-center px-10 flex items-center justify-center gap-4"
+   style={{ 
+     wordBreak: 'keep-all', 
+     overflowWrap: 'break-word', 
+     whiteSpace: 'normal',
+     fontSize: 'clamp(2rem, 8vw, 3.6rem)',
+     lineHeight: '1.2',
+     display: 'flex',
+     flexWrap: 'wrap'
+   }}>
+                    <span className="text-[#FFD700] font-black">{latestNotice?.author || ""}</span>
+                    <span className="text-white">:</span>
+                    <span className="text-white">{latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}</span>
                   </p>
                 </motion.div>
               </AnimatePresence>
             </div>
           </motion.div>
-          
+
           {/* 이전 공지 */}
           <div className="row-span-8 grid grid-cols-1 grid-rows-4 gap-4">
             {[0, 1, 2, 3].map((idx) => {
