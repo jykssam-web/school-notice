@@ -447,7 +447,7 @@ export default function ChalkboardView() {
 
       <span className="text-neutral-500 text-[10px] font-black uppercase tracking-widest break-keep">
         {latestNotice
-          ? new Date(latestNotice.timestamp).toLocaleTimeString([], {
+          ? new Date(latestNotice.timestamp).toLocaleTimeString("ko-KR", {
               hour: "2-digit",
               minute: "2-digit",
             })
@@ -467,36 +467,57 @@ export default function ChalkboardView() {
 
   <div className="flex-1 min-h-0 flex items-center justify-center px-10">
     <AnimatePresence mode="wait">
-      <motion.p
+      <motion.div
         key={latestNotice?.timestamp || "empty"}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
-        className="w-full text-center font-black leading-[1.18]"
-        style={{
-          fontSize: "clamp(2.4rem, 8vh, 3.6rem)",
-          wordBreak: "keep-all",
-          overflowWrap: "break-word",
-          whiteSpace: "normal",
-          textWrap: "balance",
-        }}
+        className="w-full h-full flex items-center justify-center"
       >
         {latestNotice ? (
-          <>
+          <p
+            className="w-full text-center font-black leading-[1.18]"
+            style={{
+              fontSize: "clamp(2.4rem, 7vh, 3.6rem)",
+              wordBreak: "keep-all",
+              overflowWrap: "break-word",
+              whiteSpace: "normal",
+              textWrap: "balance",
+            }}
+          >
             <span className="text-[#FFD700]">
-              {latestNotice.author}
+              {latestNotice.author ||
+                latestNotice.title ||
+                latestNotice.teacherName ||
+                latestNotice.senderName ||
+                ""}
             </span>
-            <span className="text-white"> : </span>
+
+            {(latestNotice.author ||
+              latestNotice.title ||
+              latestNotice.teacherName ||
+              latestNotice.senderName) && (
+              <span className="text-white"> : </span>
+            )}
+
             <span className="text-white">
-              {latestNotice.content}
+              {latestNotice.content || "현재 전달된 새로운 공지가 없습니다."}
             </span>
-          </>
+          </p>
         ) : (
-          <span className="text-white">
+          <p
+            className="w-full text-center text-white font-black leading-[1.18]"
+            style={{
+              fontSize: "clamp(2.4rem, 7vh, 3.6rem)",
+              wordBreak: "keep-all",
+              overflowWrap: "break-word",
+              whiteSpace: "normal",
+            }}
+          >
             현재 전달된 새로운 공지가 없습니다.
-          </span>
+          </p>
         )}
-      </motion.p>
+      </motion.div>
     </AnimatePresence>
   </div>
 </motion.div>
