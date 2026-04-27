@@ -432,13 +432,7 @@ export default function AdminView() {
               </button>
             )}
             <button 
-  onClick={() => navigate(`/${schoolData.id}/review`, { 
-    state: { 
-      teacherName: userData?.name || "", 
-      teacherRole: userData?.role || "teacher", 
-      schoolName: schoolData?.name || "" 
-    } 
-  })}
+  onClick={() => window.open('https://review-page-tau.vercel.app/?program=campusnotice', '_blank')}
   className="px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all bg-green-500/20 text-green-400 hover:bg-green-500/30 hover:text-green-300 border border-green-500/50"
 >
   후기 작성
@@ -595,13 +589,7 @@ export default function AdminView() {
             </button>
           )}
           <button 
-  onClick={() => navigate(`/${schoolData.id}/review`, { 
-    state: { 
-      teacherName: userData?.name || "", 
-      teacherRole: userData?.role || "teacher", 
-      schoolName: schoolData?.name || "" 
-    } 
-  })}
+  onClick={() => window.open('https://review-page-tau.vercel.app/?program=campusnotice', '_blank')}
   className="px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all bg-green-500/20 text-green-400 hover:bg-green-500/30 hover:text-green-300 border border-green-500/50"
 >
   후기 작성
