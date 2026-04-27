@@ -433,42 +433,73 @@ export default function ChalkboardView() {
         <div className="col-span-12 lg:col-span-9 row-span-12 grid grid-rows-12 gap-8">
 
         {/* 최신 공지 */}
-          <motion.div initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}
-            className="row-span-4 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-8 flex flex-col shadow-2xl relative overflow-hidden">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <div className="bg-[#FACC15] text-black px-4 py-1.5 text-[10px] font-black rounded-lg uppercase italic">Latest Notice</div>
-                <span className="text-neutral-500 text-[10px] font-black uppercase tracking-widest break-keep">
-                  {latestNotice ? `${new Date(latestNotice.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : "수신 대기 중..."}
-                </span>
-              </div>
-              <Bell size={24} className={showNotification ? "text-[#FACC15] animate-bounce" : "text-neutral-700"} />
-            </div>
-            <div className="flex-1 flex flex-col justify-center relative min-h-0">
-              <AnimatePresence mode="wait">
-                <motion.div key={latestNotice?.timestamp || "empty"} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-                  className="w-full flex flex-col items-center justify-center">
-                  <h2 className="text-[#FACC15]/30 text-[12px] font-black uppercase italic mb-4 tracking-widest">
-                    {latestNotice?.title || "최근 소식"}
-                  </h2>
-                  <p className="text-white font-bold text-center px-10 flex items-center justify-center gap-4"
-   style={{ 
-     wordBreak: 'keep-all', 
-     overflowWrap: 'break-word', 
-     whiteSpace: 'normal',
-     fontSize: 'clamp(2rem, 8vw, 3.6rem)',
-     lineHeight: '1.2',
-     display: 'flex',
-     flexWrap: 'wrap'
-   }}>
-                    <span className="text-[#FFD700] font-black">{latestNotice?.author || ""}</span>
-                    <span className="text-white">:</span>
-                    <span className="text-white">{latestNotice?.content || "현재 전달된 새로운 공지가 없습니다."}</span>
-                  </p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </motion.div>
+<motion.div
+  initial={{ x: 30, opacity: 0 }}
+  animate={{ x: 0, opacity: 1 }}
+  transition={{ delay: 0.2 }}
+  className="row-span-4 bg-[#1A1A1A] rounded-[48px] border border-white/5 p-8 flex flex-col shadow-2xl relative overflow-hidden"
+>
+  <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center gap-4">
+      <div className="bg-[#FACC15] text-black px-4 py-1.5 text-[10px] font-black rounded-lg uppercase italic">
+        Latest Notice
+      </div>
+
+      <span className="text-neutral-500 text-[10px] font-black uppercase tracking-widest break-keep">
+        {latestNotice
+          ? new Date(latestNotice.timestamp).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "수신 대기 중..."}
+      </span>
+    </div>
+
+    <Bell
+      size={24}
+      className={
+        showNotification
+          ? "text-[#FACC15] animate-bounce"
+          : "text-neutral-700"
+      }
+    />
+  </div>
+
+  <div className="flex-1 min-h-0 flex items-center justify-center px-10">
+    <AnimatePresence mode="wait">
+      <motion.p
+        key={latestNotice?.timestamp || "empty"}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="w-full text-center font-black leading-[1.18]"
+        style={{
+          fontSize: "clamp(2.4rem, 8vh, 3.6rem)",
+          wordBreak: "keep-all",
+          overflowWrap: "break-word",
+          whiteSpace: "normal",
+          textWrap: "balance",
+        }}
+      >
+        {latestNotice ? (
+          <>
+            <span className="text-[#FFD700]">
+              {latestNotice.author}
+            </span>
+            <span className="text-white"> : </span>
+            <span className="text-white">
+              {latestNotice.content}
+            </span>
+          </>
+        ) : (
+          <span className="text-white">
+            현재 전달된 새로운 공지가 없습니다.
+          </span>
+        )}
+      </motion.p>
+    </AnimatePresence>
+  </div>
+</motion.div>
 
           {/* 이전 공지 */}
           <div className="row-span-8 grid grid-cols-1 grid-rows-4 gap-4">
